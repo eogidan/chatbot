@@ -3,7 +3,7 @@
 #pip install SpeechRecognition numpy gTTs sklearn 
 #pip install gTTS
 #sudo apt-get install mpg123
- 
+
 
 
 import io
@@ -124,7 +124,7 @@ def response(user_response):
 file = "file.mp3"
 flag=True
 fst="My name is Jarvis. I will answer your queries about Science. If you want to exit, say Bye"
-tts = gTTS(fst, 'en')
+tts = gTTS(text=fst, lang= 'en',tld='com')
 tts.save(file)
 os.system("mpg123 " + file )
 r = sr.Recognizer()
@@ -133,9 +133,10 @@ prYellow(fst)
 # Taking voice input and processing 
 while(flag==True):
     with sr.Microphone() as source:
+        r.adjust_for_ambient_noise(source)
         audio= r.listen(source)
     try:
-        user_response = format(r.recognize(audio))
+        user_response = format(r.recognize_google(audio))
         print("\033[91m {}\033[00m" .format("YOU SAID : "+user_response))
     except sr.UnknownValueError:
         prYellow("Oops! Didn't catch that")
@@ -156,7 +157,7 @@ while(flag==True):
                 res=(response(user_response))
                 prYellow(res)
                 sent_tokens.remove(user_response)
-                tts = gTTS(res, 'en')
+                tts = gTTS(text=res, lang= 'en',tld='com')
                 tts.save(file)
                 os.system("mpg123 " + file)
     else:
