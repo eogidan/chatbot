@@ -72,12 +72,11 @@ def prLightGray(skk): print("\033[97m {}\033[00m" .format(skk))
 def prBlack(skk): print("\033[98m {}\033[00m" .format(skk))
 
 
- 
 #Reading in the input_corpus
 with open('intro_join','r', encoding='utf8', errors ='ignore') as fin:
     raw = fin.read().lower()
 
-#TOkenisation
+#Tokenisation
 sent_tokens = nltk.sent_tokenize(raw)# converts to list of sentences 
 word_tokens = nltk.word_tokenize(raw)# converts to list of words
 
@@ -92,7 +91,7 @@ def LemNormalize(text):
 
 # Keyword Matching
 GREETING_INPUTS = ("hello", "hi", "greetings", "sup", "what's up","hey",)
-GREETING_RESPONSES = ["hi", "hey", "*nods*", "hi there", "hello", "I am glad! You are talking to me"]
+GREETING_RESPONSES = ["yo", "what do you want?", "oh look. it's you.", "what is it?", "hello", "i would be happier if you weren't around. what do you want?"]
 
 def greeting(sentence):
     """If user's input is a greeting, return a greeting response"""
@@ -113,17 +112,22 @@ def response(user_response):
     flat.sort()
     req_tfidf = flat[-2]
     if(req_tfidf==0):
-        robo_response=robo_response+"I am sorry! I don't understand you"
+        robo_response=robo_response+"Speak more clearly, stupid."
         return robo_response
     else:
         robo_response = robo_response+sent_tokens[idx]
         return robo_response
 
+def speak(output):
+    tts = gTTS(text=output, lang= 'en',tld='com')
+    tts.save(file)
+    prYellow(output)
+    os.system("mpg123 " + file )
 
 #Recording voice input using microphone 
 file = "file.mp3"
 flag=True
-fst="My name is Jarvis. I will answer your queries about Science. If you want to exit, say Bye"
+fst="I'm a robot, which means I'm a million times smarter than you. I pity you, so I'll answer your questions."
 tts = gTTS(text=fst, lang= 'en',tld='com')
 tts.save(file)
 os.system("mpg123 " + file )
@@ -131,38 +135,45 @@ r = sr.Recognizer()
 prYellow(fst)
 
 # Taking voice input and processing 
+strikes = 0
 while(flag==True):
-    with sr.Microphone() as source:
-        r.adjust_for_ambient_noise(source)
-        audio= r.listen(source)
-    try:
-        user_response = format(r.recognize_google(audio))
-        print("\033[91m {}\033[00m" .format("YOU SAID : "+user_response))
-    except sr.UnknownValueError:
-        prYellow("Oops! Didn't catch that")
-        pass
-    
-    #user_response = input()
-    #user_response=user_response.lower()
+    if strikes < 3:
+        with sr.Microphone() as source:
+            prYellow("Shut up for a second.")
+            r.adjust_for_ambient_noise(source)
+            prYellow('Talk now.')
+            audio= r.listen(source)
+        try:
+            user_response = format(r.recognize_google(audio))
+            print("\033[91m {}\033[00m" .format("YOU SAID : "+user_response))
+        except sr.UnknownValueError:
+            speak("You're not making any sense")
+            strikes += 1
+            pass
+    else:
+        user_respone = input("I'm fed up trying to understand you. Just type your question: ").lower()
+        strikes = 0
+
+
     clas=classifier.classify(dialogue_act_features(user_response))
     if(clas!='Bye'):
         if(clas=='Emotion'):
             flag=False
-            prYellow("Jarvis: You are welcome..")
+            speak("Okay. And?")
         else:
             if(greeting(user_response)!=None):
                 print("\033[93m {}\033[00m" .format("Jarvis: "+greeting(user_response)))
+                res=(response(user_response))
+                sent_tokens.remove(user_response)
+                speak(res)
             else:
                 print("\033[93m {}\033[00m" .format("Jarvis: ",end=""))
                 res=(response(user_response))
-                prYellow(res)
                 sent_tokens.remove(user_response)
-                tts = gTTS(text=res, lang= 'en',tld='com')
-                tts.save(file)
-                os.system("mpg123 " + file)
+                speak(res)
     else:
         flag=False
-        prYellow("Jarvis: Bye! take care..")
+        speak("Finally, you're leaving.")
         
         
 #reference
