@@ -73,7 +73,7 @@ def prBlack(skk): print("\033[98m {}\033[00m" .format(skk))
 
 
 #Reading in the input_corpus
-with open('intro_join','r', encoding='utf8', errors ='ignore') as fin:
+with open('WikiQA-train.txt','r', encoding='utf8', errors ='ignore') as fin:
     raw = fin.read().lower()
 
 #Tokenisation
@@ -128,11 +128,8 @@ def speak(output):
 file = "file.mp3"
 flag=True
 fst="I'm a robot, which means I'm a million times smarter than you. I pity you, so I'll answer your questions."
-tts = gTTS(text=fst, lang= 'en',tld='com')
-tts.save(file)
-os.system("mpg123 " + file )
+speak(fst)
 r = sr.Recognizer()
-prYellow(fst)
 
 # Taking voice input and processing 
 strikes = 0
